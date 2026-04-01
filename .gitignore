@@ -1,0 +1,22 @@
+# Environment & credentials
+.env
+terraform/terraform.tfvars
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Airflow
+logs/
+airflow.db
+
+# Google credentials
+dags/credentials.json
+
+# Backup files
+*.bak
