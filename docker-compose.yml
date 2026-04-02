@@ -15,7 +15,7 @@ services:
       retries: 5
 
   airflow-webserver:
-    image: apache/airflow:2.8.1
+    image: mdethereal/supplychain360-airflow:latest
     command: webserver
     ports:
       - 8080:8080
@@ -26,7 +26,6 @@ services:
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
       AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
-      _PIP_ADDITIONAL_REQUIREMENTS: 'boto3 pandas pyarrow python-dotenv gspread google-auth psycopg2-binary sqlalchemy snowflake-connector-python dbt-snowflake'
     env_file:
       - .env
     volumes:
@@ -44,7 +43,7 @@ services:
       retries: 5
 
   airflow-scheduler:
-    image: apache/airflow:2.8.1
+    image: mdethereal/supplychain360-airflow:latest
     command: scheduler
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -53,7 +52,6 @@ services:
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
       AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
-      _PIP_ADDITIONAL_REQUIREMENTS: 'boto3 pandas pyarrow python-dotenv gspread google-auth psycopg2-binary sqlalchemy snowflake-connector-python dbt-snowflake'
     env_file:
       - .env
     volumes:
@@ -66,7 +64,7 @@ services:
         condition: service_healthy
 
   airflow-init:
-    image: apache/airflow:2.8.1
+    image: mdethereal/supplychain360-airflow:latest
     command: version
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -75,7 +73,6 @@ services:
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
       AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
-      _PIP_ADDITIONAL_REQUIREMENTS: 'boto3 pandas pyarrow python-dotenv gspread google-auth psycopg2-binary sqlalchemy snowflake-connector-python dbt-snowflake'
       _AIRFLOW_DB_UPGRADE: 'true'
       _AIRFLOW_WWW_USER_CREATE: 'true'
       _AIRFLOW_WWW_USER_USERNAME: admin
