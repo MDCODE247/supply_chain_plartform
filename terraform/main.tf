@@ -9,6 +9,12 @@ terraform {
       version = "~> 0.100"
     }
   }
+
+  backend "s3" {
+    bucket  = "supplychain360-terraform-state"
+    key     = "supplychain360/terraform.tfstate"
+    region  = "eu-west-2"
+  }
 }
 
 provider "aws" {
