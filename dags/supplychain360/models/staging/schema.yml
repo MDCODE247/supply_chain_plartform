@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: stg_products
+    columns:
+      - name: product_id
+        tests:
+          - unique
+          - not_null
+      - name: unit_price
+        tests:
+          - not_null
+
+  - name: stg_suppliers
+    columns:
+      - name: supplier_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_warehouses
+    columns:
+      - name: warehouse_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_stores
+    columns:
+      - name: store_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_sales
+    columns:
+      - name: transaction_id
+        tests:
+          - unique
+          - not_null
+      - name: quantity_sold
+        tests:
+          - not_null
+
+  - name: stg_shipments
+    columns:
+      - name: shipment_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_inventory
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+      - name: warehouse_id
+        tests:
+          - not_null

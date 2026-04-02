@@ -1,0 +1,13 @@
+supplychain360:
+  outputs:
+    dev:
+      account: igvccsc-eq80017
+      database: SUPPLYCHAIN360
+      password: RrJ6Bp3jq9RZMEF
+      role: SYSADMIN
+      schema: DBT_DEV
+      threads: 4
+      type: snowflake
+      user: MOHAMMED007
+      warehouse: SUPPLYCHAIN_WH
+  target: dev

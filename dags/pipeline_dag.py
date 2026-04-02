@@ -228,7 +228,35 @@ def load_to_snowflake():
     conn.close()
     print("Snowflake Load Done!")
 
-from datetime import timedelta
+def run_dbt():
+    import subprocess
+
+    dbt_project_dir = '/opt/airflow/dags/supplychain360'
+    dbt_profiles_dir = '/opt/airflow/dags'
+
+    result = subprocess.run(
+        ['dbt', 'run', '--profiles-dir', dbt_profiles_dir, '--project-dir', dbt_project_dir],
+        capture_output=True,
+        text=True
+    )
+    print(result.stdout)
+    print(result.stderr)
+
+    if result.returncode != 0:
+        raise Exception(f"dbt run failed: {result.stderr}")
+
+    result_test = subprocess.run(
+        ['dbt', 'test', '--profiles-dir', dbt_profiles_dir, '--project-dir', dbt_project_dir],
+        capture_output=True,
+        text=True
+    )
+    print(result_test.stdout)
+    print(result_test.stderr)
+
+    if result_test.returncode != 0:
+        raise Exception(f"dbt test failed: {result_test.stderr}")
+
+    print("dbt run and test completed successfully!")
 
 default_args = {
     'owner': 'airflow',
@@ -269,4 +297,9 @@ with DAG(
         python_callable=load_to_snowflake
     )
 
-    task_s3 >> task_sheets >> task_supabase >> task_snowflake
+    task_dbt = PythonOperator(
+        task_id='run_dbt_models',
+        python_callable=run_dbt
+    )
+
+    task_s3 >> task_sheets >> task_supabase >> task_snowflake >> task_dbt
