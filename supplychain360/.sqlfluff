@@ -1,0 +1,9 @@
+[sqlfluff]
+dialect = snowflake
+templater = jinja
+max_line_length = 120
+exclude_rules = LT01,LT05,CP02,AL09,AL01,ST06,ST02,LT02
+
+[sqlfluff:indentation]
+indent_unit = space
+tab_space_size = 4
