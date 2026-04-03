@@ -244,7 +244,7 @@ def run_dbt():
     dbt_profiles_dir = '/opt/airflow/dags'
 
     result = subprocess.run(
-        ['dbt', 'run', '--profiles-dir', dbt_profiles_dir, '--project-dir', dbt_project_dir],
+        ['/home/airflow/.local/bin/dbt', 'run', '--profiles-dir', dbt_profiles_dir, '--project-dir', dbt_project_dir],
         capture_output=True,
         text=True
     )
@@ -255,7 +255,7 @@ def run_dbt():
         raise Exception(f"dbt run failed: {result.stderr}")
 
     result_test = subprocess.run(
-        ['dbt', 'test', '--profiles-dir', dbt_profiles_dir, '--project-dir', dbt_project_dir],
+        ['/home/airflow/.local/bin/dbt', 'test', '--profiles-dir', dbt_profiles_dir, '--project-dir', dbt_project_dir],
         capture_output=True,
         text=True
     )
