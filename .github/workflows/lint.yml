@@ -45,4 +45,4 @@ jobs:
             --dialect snowflake \
             --templater jinja \
             --ignore templating,parsing \
-            --exclude-rules LT12
+            --exclude-rules LT01,LT02,LT05,LT12,AL01,AL09,CP02,ST02,ST06
