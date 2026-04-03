@@ -43,5 +43,6 @@ jobs:
         run: |
           sqlfluff lint supplychain360/models/ \
             --dialect snowflake \
-            --rules LT01,LT02,LT09,CP01,CP02 \
-            --ignore templating
+            --templater jinja \
+            --ignore templating,parsing \
+            --exclude-rules LT12
