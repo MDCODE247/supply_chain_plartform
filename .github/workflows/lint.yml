@@ -1,0 +1,49 @@
+name: Code Quality & Linting
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  python-lint:
+    name: Python Lint (flake8)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install flake8
+        run: pip install flake8
+
+      - name: Run flake8
+        run: |
+          flake8 dags/pipeline_dag.py \
+            --max-line-length=120 \
+            --ignore=E501,W503,E302,E303 \
+            --statistics
+
+  sql-lint:
+    name: SQL Lint (sqlfluff)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install sqlfluff
+        run: pip install sqlfluff sqlfluff-templater-dbt
+
+      - name: Run sqlfluff
+        run: |
+          cd supplychain360
+          sqlfluff lint models/ \
+            --dialect snowflake \
+            --templater dbt \
+            --rules L003,L004,L010,L011,L012,L019,L020,L021,L022 \
+            --ignore templating

@@ -4,21 +4,97 @@ sources:
   - name: raw
     database: SUPPLYCHAIN360
     schema: RAW
+    freshness:
+      warn_after: {count: 24, period: hour}
+      error_after: {count: 48, period: hour}
+    loaded_at_field: null
     tables:
       - name: PRODUCTS
+        description: "Product catalog from S3"
+        columns:
+          - name: PRODUCT_ID
+            tests:
+              - unique
+              - not_null
+          - name: PRODUCT_NAME
+            tests:
+              - not_null
+          - name: CATEGORY
+            tests:
+              - not_null
+          - name: UNIT_PRICE
+            tests:
+              - not_null
+
       - name: SUPPLIERS
+        description: "Supplier reference data from S3"
+        columns:
+          - name: SUPPLIER_ID
+            tests:
+              - unique
+              - not_null
+
       - name: WAREHOUSES
+        description: "Warehouse locations from S3"
+        columns:
+          - name: WAREHOUSE_ID
+            tests:
+              - unique
+              - not_null
+
       - name: INVENTORY
+        description: "Daily inventory snapshots from S3"
+        columns:
+          - name: PRODUCT_ID
+            tests:
+              - not_null
+          - name: WAREHOUSE_ID
+            tests:
+              - not_null
+          - name: QUANTITY_AVAILABLE
+            tests:
+              - not_null
+
       - name: SHIPMENTS
+        description: "Shipment records from S3"
+        columns:
+          - name: SHIPMENT_ID
+            tests:
+              - unique
+              - not_null
 
   - name: sheets
     database: SUPPLYCHAIN360
     schema: SHEETS
     tables:
       - name: SHEET1
+        description: "Store data from Google Sheets"
+        columns:
+          - name: STORE_ID
+            tests:
+              - unique
+              - not_null
+          - name: STORE_NAME
+            tests:
+              - not_null
+          - name: REGION
+            tests:
+              - not_null
 
   - name: supabase
     database: SUPPLYCHAIN360
     schema: SUPABASE
     tables:
       - name: SALES
+        description: "Sales transactions from Supabase"
+        columns:
+          - name: TRANSACTION_ID
+            tests:
+              - unique
+              - not_null
+          - name: STORE_ID
+            tests:
+              - not_null
+          - name: PRODUCT_ID
+            tests:
+              - not_null

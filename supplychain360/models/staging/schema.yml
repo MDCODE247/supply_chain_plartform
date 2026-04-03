@@ -10,12 +10,20 @@ models:
       - name: unit_price
         tests:
           - not_null
+      - name: category
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['ELECTRONICS', 'GROCERIES', 'HOME APPLIANCES', 'CLOTHING', 'BEAUTY']
 
   - name: stg_suppliers
     columns:
       - name: supplier_id
         tests:
           - unique
+          - not_null
+      - name: supplier_name
+        tests:
           - not_null
 
   - name: stg_warehouses
@@ -24,6 +32,9 @@ models:
         tests:
           - unique
           - not_null
+      - name: city
+        tests:
+          - not_null
 
   - name: stg_stores
     columns:
@@ -31,6 +42,11 @@ models:
         tests:
           - unique
           - not_null
+      - name: region
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['SOUTH', 'EAST', 'WEST', 'MIDWEST', 'NORTHEAST', 'NORTHWEST', 'SOUTHEAST', 'SOUTHWEST']
 
   - name: stg_sales
     columns:
@@ -41,6 +57,12 @@ models:
       - name: quantity_sold
         tests:
           - not_null
+      - name: sale_amount
+        tests:
+          - not_null
+      - name: unit_price
+        tests:
+          - not_null
 
   - name: stg_shipments
     columns:
@@ -48,6 +70,11 @@ models:
         tests:
           - unique
           - not_null
+      - name: carrier
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['FEDEX', 'UPS', 'DHL', 'USPS']
 
   - name: stg_inventory
     columns:
@@ -55,5 +82,8 @@ models:
         tests:
           - not_null
       - name: warehouse_id
+        tests:
+          - not_null
+      - name: quantity_available
         tests:
           - not_null
