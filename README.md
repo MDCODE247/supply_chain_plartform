@@ -3,13 +3,16 @@
 A production-grade end-to-end data engineering pipeline for SupplyChain360, a retail distribution company managing product distribution across hundreds of US stores.
 
 ## Architecture Overview
+
+![SupplyChain360 Architecture](docs/architecture.svg)
+
+**Pipeline flow:** Sources -> Airflow (7-task DAG) -> S3 Parquet -> Snowflake RAW -> dbt -> Facts
+
+**7-task Airflow pipeline:**
 ```
-S3 (CSV/JSON) ──┐
-                ├──► Airflow ──► Snowflake (RAW) ──► dbt ──► Staging ──► Dimensions/Facts
-Google Sheets ──┤                                      │
-                │                                      └──► dbt Tests
-Supabase (PG) ──┘
+check_idempotency -> migrate_s3_files -> migrate_google_sheets -> migrate_supabase -> load_to_snowflake -> data_quality_checks -> run_dbt_models
 ```
+
 
 ## Tech Stack
 
