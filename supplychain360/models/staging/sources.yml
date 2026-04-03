@@ -86,7 +86,7 @@ sources:
     schema: SUPABASE
     tables:
       - name: SALES
-        description: "Sales transactions from Supabase"
+        description: "Combined sales transactions from all daily tables"
         columns:
           - name: TRANSACTION_ID
             tests:
@@ -98,3 +98,29 @@ sources:
           - name: PRODUCT_ID
             tests:
               - not_null
+      - name: sales_2026_03_10
+        description: "Sales transactions for 2026-03-10"
+      - name: sales_2026_03_11
+        description: "Sales transactions for 2026-03-11"
+      - name: sales_2026_03_12
+        description: "Sales transactions for 2026-03-12"
+      - name: sales_2026_03_13
+        description: "Sales transactions for 2026-03-13"
+      - name: sales_2026_03_14
+        description: "Sales transactions for 2026-03-14"
+      - name: sales_2026_03_15
+        description: "Sales transactions for 2026-03-15"
+      - name: sales_2026_03_16
+        description: "Sales transactions for 2026-03-16"
+      - name: CITIES_RAW
+        description: "Cities reference data"
+      - name: DRIVERS_RAW
+        description: "Driver data"
+      - name: RIDERS_RAW
+        description: "Rider data"
+      - name: TRIPS_RAW
+        description: "Trip records"
+      - name: PAYMENTS_RAW
+        description: "Payment records"
+      - name: DRIVER_STATUS_EVENTS_RAW
+        description: "Driver status events" 

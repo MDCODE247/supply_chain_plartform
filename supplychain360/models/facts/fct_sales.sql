@@ -1,5 +1,16 @@
+{{
+    config(
+        materialized='incremental',
+        unique_key='transaction_id',
+        on_schema_change='sync_all_columns'
+    )
+}}
+
 WITH sales AS (
     SELECT * FROM {{ ref('stg_sales') }}
+    {%- if is_incremental() %}
+    WHERE transaction_date > (SELECT MAX(transaction_date) FROM {{ this }})
+    {%- endif %}
 ),
 
 stores AS (
@@ -14,6 +25,7 @@ SELECT
     s.transaction_id,
     s.transaction_date,
     s.transaction_timestamp,
+    s.source_table,
     s.store_id,
     st.store_name,
     st.city                     AS store_city,

@@ -81,6 +81,11 @@ def migrate_s3_files():
             else:
                 df = pd.read_json(io.BytesIO(content))
 
+            # Add ingestion timestamp metadata
+            from datetime import datetime, timezone
+            df['_ingested_at'] = datetime.now(timezone.utc).isoformat()
+            df['_source_file'] = source_key
+
             parquet_buffer = io.BytesIO()
             df.to_parquet(parquet_buffer, index=False, engine='pyarrow')
             parquet_buffer.seek(0)
@@ -158,6 +163,11 @@ def migrate_supabase():
             if df[col].dtype == 'object':
                 df[col] = df[col].astype(str)
 
+        # Add ingestion timestamp metadata
+        from datetime import datetime, timezone
+        df['_ingested_at'] = datetime.now(timezone.utc).isoformat()
+        df['_source_table'] = table_name
+
         parquet_buffer = io.BytesIO()
         df.to_parquet(parquet_buffer, index=False, engine='pyarrow')
         parquet_buffer.seek(0)
@@ -200,8 +210,9 @@ def load_to_snowflake():
                 if not key.endswith('.parquet'):
                     continue
 
+                # Preserve full table name including date suffix
                 filename = key.split('/')[-1].replace('.parquet', '')
-                table_name = filename.split('_2026')[0].split('_2025')[0].upper()
+                table_name = filename.upper().replace('-', '_')
 
                 print(f"Loading: {key} -> {schema}.{table_name}")
 
@@ -317,6 +328,67 @@ def check_idempotency(**context):
     print("Idempotency check passed!")
 
 
+def run_data_quality_checks():
+    import snowflake.connector
+    print("Running data quality checks...")
+
+    conn = snowflake.connector.connect(
+        account=get_ssm_parameter('/supplychain360/snowflake_account'),
+        user=get_ssm_parameter('/supplychain360/snowflake_user'),
+        password=get_ssm_parameter('/supplychain360/snowflake_password'),
+        warehouse=get_ssm_parameter('/supplychain360/snowflake_warehouse'),
+        database=get_ssm_parameter('/supplychain360/snowflake_database'),
+        role=get_ssm_parameter('/supplychain360/snowflake_role')
+    )
+
+    checks = [
+        ("Duplicate transactions", """
+            SELECT COUNT(*) as cnt FROM (
+                SELECT TRANSACTION_ID, COUNT(*) as c
+                FROM SUPPLYCHAIN360.SUPABASE.SALES
+                GROUP BY TRANSACTION_ID HAVING c > 1
+            )
+        """, 0),
+        ("Null product IDs in sales", """
+            SELECT COUNT(*) FROM SUPPLYCHAIN360.SUPABASE.SALES
+            WHERE PRODUCT_ID IS NULL
+        """, 0),
+        ("Null store IDs in sales", """
+            SELECT COUNT(*) FROM SUPPLYCHAIN360.SUPABASE.SALES
+            WHERE STORE_ID IS NULL
+        """, 0),
+        ("Negative sale amounts", """
+            SELECT COUNT(*) FROM SUPPLYCHAIN360.SUPABASE.SALES
+            WHERE SALE_AMOUNT < 0
+        """, 0),
+        ("Raw tables loaded", """
+            SELECT COUNT(*) FROM SUPPLYCHAIN360.INFORMATION_SCHEMA.TABLES
+            WHERE TABLE_SCHEMA IN ('RAW', 'SHEETS', 'SUPABASE')
+        """, 1),
+    ]
+
+    all_passed = True
+    for check_name, query, max_allowed in checks:
+        cursor = conn.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()[0]
+        # For "Raw tables loaded" check, we want result >= 1
+        if check_name == "Raw tables loaded":
+            status = "PASS" if result >= 1 else "FAIL"
+        else:
+            status = "PASS" if result <= max_allowed else "FAIL"
+        print(f"[{status}] {check_name}: {result}")
+        if status == "FAIL":
+            all_passed = False
+
+    conn.close()
+
+    if not all_passed:
+        raise Exception("Data quality checks failed! Check logs for details.")
+
+    print("All data quality checks passed!")
+
+
 with DAG(
     dag_id='data_pipeline',
     default_args=default_args,
@@ -352,9 +424,14 @@ with DAG(
         python_callable=load_to_snowflake
     )
 
+    task_dq = PythonOperator(
+        task_id='data_quality_checks',
+        python_callable=run_data_quality_checks
+    )
+
     task_dbt = PythonOperator(
         task_id='run_dbt_models',
         python_callable=run_dbt
     )
 
-    task_idempotency >> task_s3 >> task_sheets >> task_supabase >> task_snowflake >> task_dbt
+    task_idempotency >> task_s3 >> task_sheets >> task_supabase >> task_snowflake >> task_dq >> task_dbt

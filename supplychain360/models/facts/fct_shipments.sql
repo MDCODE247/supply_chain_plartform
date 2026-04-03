@@ -1,5 +1,16 @@
+{{
+    config(
+        materialized='incremental',
+        unique_key='shipment_id',
+        on_schema_change='sync_all_columns'
+    )
+}}
+
 WITH shipments AS (
     SELECT * FROM {{ ref('stg_shipments') }}
+    {% if is_incremental() %}
+    WHERE shipment_date > (SELECT MAX(shipment_date) FROM {{ this }})
+    {% endif %}
 ),
 
 warehouses AS (
