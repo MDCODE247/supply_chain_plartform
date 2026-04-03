@@ -82,7 +82,6 @@ def migrate_s3_files():
                 df = pd.read_json(io.BytesIO(content))
 
             # Add ingestion timestamp metadata
-            from datetime import datetime, timezone
             df['_ingested_at'] = datetime.now(timezone.utc).isoformat()
             df['_source_file'] = source_key
 
@@ -164,7 +163,6 @@ def migrate_supabase():
                 df[col] = df[col].astype(str)
 
         # Add ingestion timestamp metadata
-        from datetime import datetime, timezone
         df['_ingested_at'] = datetime.now(timezone.utc).isoformat()
         df['_source_table'] = table_name
 
